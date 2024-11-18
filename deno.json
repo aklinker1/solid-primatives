@@ -1,0 +1,21 @@
+{
+  "$schema": "https://deno.land/x/deno/cli/schemas/config-file.v1.json",
+  "name": "@aklinker1/solid-primatives",
+  "version": "0.3.9",
+  "license": "MIT",
+  "exports": {
+    "./defineComponent": "./src/defineComponent.ts",
+    "./query": "./src/query.ts",
+    "./toValue": "./src/toValue.ts",
+    "./watch": "./src/watch.ts",
+    "./whenever": "./src/whenever.ts"
+  },
+  "publish": {
+    "include": ["README.md", "src/**/*.ts", "src/**/*.tsx"],
+    "exclude": ["**/*.test.ts"]
+  },
+  "compilerOptions": {
+    "jsx": "precompile",
+    "jsxImportSource": "npm:solid-js@1"
+  }
+}
