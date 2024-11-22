@@ -34,10 +34,8 @@ export function watch<T>(
   cb: (newValue: T, oldValue: T | undefined) => void,
   options?: WatchOptions,
 ) {
-  console.log("Watching...");
   const [prev, setPrev] = createSignal<T>();
   const effect = () => {
-    console.log("value changed");
     const oldValue = prev();
     const newValue = value();
     if (options?.deep ? !dequal(oldValue, newValue) : oldValue !== newValue) {
