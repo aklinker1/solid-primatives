@@ -1,4 +1,4 @@
-import { type Context, useContext } from "npm:solid-js@1";
+import { type Context, useContext } from "solid-js";
 
 export function useRequiredContext<T>(context: Context<T>): NonNullable<T> {
   const value = useContext(context);

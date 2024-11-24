@@ -37,12 +37,12 @@ import {
   createSignal,
   onCleanup,
   onMount,
-} from "npm:solid-js@1";
+} from "solid-js";
 import type { MaybeAccessor } from "./toValue.ts";
 import { useRequiredContext } from "./useRequiredContext.ts";
 import { toValue } from "./toValue.ts";
 import { watch } from "./watch.ts";
-// import { createStore, type Store, type SetStoreFunction } from "npm:solid-js@1/store";
+// import { createStore, type Store, type SetStoreFunction } from "solid-js/store";
 
 // CLIENT
 

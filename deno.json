@@ -17,5 +17,8 @@
   "compilerOptions": {
     "jsx": "precompile",
     "jsxImportSource": "npm:solid-js@1"
+  },
+  "imports": {
+    "solid-js": "npm:solid-js@^1.9.3"
   }
 }

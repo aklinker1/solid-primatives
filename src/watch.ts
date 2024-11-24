@@ -2,7 +2,7 @@
  * Watch for changes to values.
  * @module
  */
-import { type Accessor, createEffect, createSignal } from "npm:solid-js@1";
+import { type Accessor, createEffect, createSignal } from "solid-js";
 import { dequal } from "npm:dequal@2/lite";
 
 /** Configuration for how the `watch` function. */

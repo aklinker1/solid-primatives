@@ -2,7 +2,7 @@
  * Helpers for getting the value of accessors.
  * @module
  */
-import type { Accessor } from "npm:solid-js@1";
+import type { Accessor } from "solid-js";
 
 /**
  * Contains either an accessor or a value.

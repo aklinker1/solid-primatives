@@ -1,4 +1,4 @@
-import type { Component, ParentProps } from "npm:solid-js@1";
+import type { Component, ParentProps } from "solid-js";
 
 /**
  * Shortcut for defining a component with types.

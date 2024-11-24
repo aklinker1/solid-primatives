@@ -8,7 +8,8 @@
     "npm:@solidjs/testing-library@*": "0.8.10_solid-js@1.9.3__seroval@1.1.1",
     "npm:dequal@2": "2.0.3",
     "npm:solid-js@*": "1.9.3_seroval@1.1.1",
-    "npm:solid-js@1": "1.9.3_seroval@1.1.1"
+    "npm:solid-js@1": "1.9.3_seroval@1.1.1",
+    "npm:solid-js@^1.9.3": "1.9.3_seroval@1.1.1"
   },
   "jsr": {
     "@std/assert@1.0.7": {
@@ -168,5 +169,10 @@
         "has-flag"
       ]
     }
+  },
+  "workspace": {
+    "dependencies": [
+      "npm:solid-js@^1.9.3"
+    ]
   }
 }

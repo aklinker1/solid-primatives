@@ -2,7 +2,7 @@
  * Shorthand for watching for a accessor's value to be truthy.
  * @module
  */
-import type { Accessor } from "npm:solid-js@1";
+import type { Accessor } from "solid-js";
 import { watch, type WatchOptions } from "./watch.ts";
 
 /** Call the callback whenever the value changes and is truthy. */
