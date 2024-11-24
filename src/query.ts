@@ -110,6 +110,8 @@ export function useQuery<Value, Err = unknown>(
   const client = useQueryClient();
 
   const fetch = (fetchOptions: { useCache: boolean }) => {
+    if (toValue(options?.enabled) === false) return Promise.resolve(undefined);
+
     const keyStr = serializeKey(key);
     if (fetchOptions.useCache) {
       const cached = client.store[keyStr];
@@ -143,6 +145,9 @@ export function useQuery<Value, Err = unknown>(
   watch(() => toValue(key), () => void fetch({ useCache: true }), {
     deep: true,
   });
+
+  // Refetch when enabled flag changes
+  watch(() => toValue(options?.enabled), () => void fetch({ useCache: true }));
 
   // Reload on invalidation
   const onInvalidationMessage = (e: Event) => {
@@ -182,6 +187,7 @@ export type QueryKey =
 export interface UseQueryOptions<Value, Err = unknown> {
   onSuccess?: (value: Value, client: QueryClient) => void;
   onError?: (err: Err, client: QueryClient) => void;
+  enabled?: MaybeAccessor<boolean>;
 }
 
 export interface QueryData {
@@ -207,7 +213,7 @@ export interface UseQueryReturn<Value, Err = unknown> {
   error: Accessor<Err | undefined>;
   status: Accessor<AsyncStatus>;
   isLoading: Accessor<boolean>;
-  refetch: () => Promise<Value>;
+  refetch: () => Promise<Value | undefined>;
 }
 
 // MUTATION
@@ -221,23 +227,34 @@ export function useMutation<Value, Args extends unknown[], Err = unknown>(
 ): UseMutationReturn<Value, Args, Err> {
   const client = useQueryClient();
 
-  const { fn: wrappedMutate, data, status, error } = useAsyncFn<
-    Value,
-    Args,
-    Err
-  >(
-    mutate,
-    (res) => {
-      if (options?.invalidate?.length) {
-        client.invalidateQueries(options.invalidate);
-      }
-      options?.onSuccess?.(res, client);
-    },
-    (err) => options?.onError?.(err, client),
-  );
+  const [data, setData] = createSignal<Value>();
+  const [status, setStatus] = createSignal<AsyncStatus>("idle");
+  const [error, setError] = createSignal<Err>();
+
+  const refetch = (...args: Args) => {
+    setStatus("loading");
+    setError(undefined);
+    return mutate(...args).then(
+      (res) => {
+        setStatus("success");
+        setData(() => res);
+        if (options?.invalidate?.length) {
+          client.invalidateQueries(options.invalidate);
+        }
+        options?.onSuccess?.(res, client);
+        return res;
+      },
+      (err) => {
+        setStatus("error");
+        setError(() => err);
+        options?.onError?.(err, client);
+        throw err;
+      },
+    );
+  };
 
   return {
-    mutate: wrappedMutate,
+    mutate: refetch,
     data,
     status,
     error,
@@ -274,39 +291,4 @@ function serializeKey(key: MaybeAccessor<QueryKey>): string {
   const value = toValue(key);
   if (!Array.isArray(value)) return String(value);
   return value.join(" → ");
-}
-
-function useAsyncFn<Value, Args extends unknown[], Err = unknown>(
-  fn: (...args: Args) => Promise<Value>,
-  onSuccess: (res: Value) => void,
-  onError: (err: Err) => void,
-) {
-  const [data, setData] = createSignal<Value>();
-  const [status, setStatus] = createSignal<AsyncStatus>("idle");
-  const [error, setError] = createSignal<Err>();
-
-  return {
-    data,
-    status,
-    error,
-    // NOT async to prevent running code in microtask queue, instead run it as soon as the function is called.
-    fn: (...args: Args) => {
-      setStatus("loading");
-      setError(undefined);
-      return fn(...args).then(
-        (res) => {
-          setStatus("success");
-          setData(() => res);
-          onSuccess(res);
-          return res;
-        },
-        (err) => {
-          setStatus("error");
-          setError(() => err);
-          onError(err);
-          throw err;
-        },
-      );
-    },
-  };
 }
