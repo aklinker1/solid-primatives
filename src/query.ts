@@ -42,7 +42,7 @@ import type { MaybeAccessor } from "./toValue.ts";
 import { useRequiredContext } from "./useRequiredContext.ts";
 import { toValue } from "./toValue.ts";
 import { watch } from "./watch.ts";
-// import { createStore, type Store, type SetStoreFunction } from "solid-js/store";
+import { createStore, type SetStoreFunction, type Store } from "solid-js/store";
 
 // CLIENT
 
@@ -58,7 +58,7 @@ const INVALIDATE_EVENT = "query:invalidate";
  * Create a new query client to provide to the rest of the application.
  */
 export function createQueryClient(): QueryClient {
-  // const [store, setStore] = createStore<Record<string, unknown>>({})
+  const [store, setStore] = createStore<Record<string, QueryData>>({});
 
   const invalidateQuery = (key: QueryKey) => {
     globalThis?.dispatchEvent?.(
@@ -67,8 +67,8 @@ export function createQueryClient(): QueryClient {
   };
 
   return {
-    // store,
-    // setStore,
+    store,
+    setStore,
     invalidateQuery,
     invalidateQueries: (keys) => {
       for (let i = 0; i < keys.length; i++) invalidateQuery(keys[i]);
@@ -80,9 +80,14 @@ export function createQueryClient(): QueryClient {
  * The query client is responsible for managing invalidation and shared state.
  */
 export interface QueryClient {
-  // TODO: Share state between query instances so you don't have to make the same request twice.
-  // store: Store<Record<string, unknown>>;
-  // setStore: SetStoreFunction<Record<string, unknown>>
+  /**
+   * Contains details about existing queries.
+   */
+  store: Store<Record<string, QueryData>>;
+  /**
+   * Setter for updating query data.
+   */
+  setStore: SetStoreFunction<Record<string, QueryData>>;
   /** Invalidate a single query. */
   invalidateQuery: (key: QueryKey) => void;
   /** Invalidate multiple queries. */
@@ -103,14 +108,39 @@ export function useQuery<Value, Err = unknown>(
   options?: UseQueryOptions<Value, Err>,
 ): UseQueryReturn<Value, Err> {
   const client = useQueryClient();
-  const { fn: refetch, data, status, error } = useAsyncFn<Value, [], Err>(
-    query,
-    (res) => options?.onSuccess?.(res, client),
-    (err) => options?.onError?.(err, client),
-  );
+
+  const fetch = (fetchOptions: { useCache: boolean }) => {
+    const keyStr = serializeKey(key);
+    if (fetchOptions.useCache) {
+      const cached = client.store[keyStr];
+      if (cached != null) {
+        if (cached.error) return Promise.reject(cached.error as Error);
+        else return Promise.resolve(cached.data as Value);
+      }
+    }
+
+    client.setStore(keyStr, (existing) => ({
+      ...existing,
+      status: "loading",
+      err: undefined,
+    }));
+
+    return Promise.resolve(query()).then(
+      (data) => {
+        client.setStore(keyStr, { status: "success", data });
+        options?.onSuccess?.(data, client);
+        return data;
+      },
+      (error) => {
+        client.setStore(keyStr, { status: "error", error });
+        options?.onError?.(error, client);
+        throw error;
+      },
+    );
+  };
 
   // Reload on key change
-  watch(() => toValue(key), () => void refetch(), {
+  watch(() => toValue(key), () => void fetch({ useCache: true }), {
     deep: true,
   });
 
@@ -118,7 +148,7 @@ export function useQuery<Value, Err = unknown>(
   const onInvalidationMessage = (e: Event) => {
     const currentKey = serializeKey(key);
     const invalidatedKey = (e as CustomEvent<string>).detail;
-    if (currentKey.startsWith(invalidatedKey)) void refetch();
+    if (currentKey.startsWith(invalidatedKey)) void fetch({ useCache: false });
   };
   onMount(() =>
     globalThis?.addEventListener?.(INVALIDATE_EVENT, onInvalidationMessage)
@@ -128,14 +158,14 @@ export function useQuery<Value, Err = unknown>(
   );
 
   // Initial query
-  onMount(refetch);
+  onMount(() => void fetch({ useCache: true }));
 
   return {
-    data,
-    status,
-    error,
-    refetch,
-    isLoading: () => status() === "loading",
+    data: () => client.store[serializeKey(key)]?.data as Value | undefined,
+    status: () => client.store[serializeKey(key)]?.status ?? "idle",
+    error: () => client.store[serializeKey(key)]?.error as Err | undefined,
+    refetch: () => fetch({ useCache: false }),
+    isLoading: () => client.store[serializeKey(key)]?.status === "loading",
   };
 }
 
@@ -152,6 +182,12 @@ export type QueryKey =
 export interface UseQueryOptions<Value, Err = unknown> {
   onSuccess?: (value: Value, client: QueryClient) => void;
   onError?: (err: Err, client: QueryClient) => void;
+}
+
+export interface QueryData {
+  status: AsyncStatus;
+  error: unknown | undefined;
+  data: unknown | undefined;
 }
 
 /**
@@ -184,6 +220,7 @@ export function useMutation<Value, Args extends unknown[], Err = unknown>(
   options?: UseMutationOptions<Value, Err>,
 ): UseMutationReturn<Value, Args, Err> {
   const client = useQueryClient();
+
   const { fn: wrappedMutate, data, status, error } = useAsyncFn<
     Value,
     Args,
