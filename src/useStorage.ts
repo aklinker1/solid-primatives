@@ -1,5 +1,5 @@
 /**
- * Utils for working with web storage.
+ * Utils for persisting data to storage.
  * @module
  */
 import { type MaybeRefOrAccessor, toValue } from "./toValue.ts";

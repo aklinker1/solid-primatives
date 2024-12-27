@@ -1,5 +1,6 @@
 /**
  * Helpers for defining components as default exports.
+ * @module
  */
 import type { Component, ParentProps } from "solid-js";
 
