@@ -5,6 +5,8 @@
   "license": "MIT",
   "exports": {
     "./computed": "./src/computed.ts",
+    "./createGlobalState": "./src/createGlobalState.ts",
+    "./createSharedHook": "./src/createSharedHook.ts",
     "./defineComponent": "./src/defineComponent.ts",
     "./query": "./src/query.ts",
     "./readonly": "./src/readonly.ts",
