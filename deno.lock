@@ -172,6 +172,7 @@
   },
   "workspace": {
     "dependencies": [
+      "npm:solid-js@1",
       "npm:solid-js@^1.9.3"
     ]
   }

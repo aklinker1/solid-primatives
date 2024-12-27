@@ -4,6 +4,8 @@
  */
 import { type Accessor, createEffect, createSignal } from "solid-js";
 import { dequal } from "npm:dequal@2/lite";
+import type { Ref } from "./ref.ts";
+import { toValue } from "./toValue.ts";
 
 /** Configuration for how the `watch` function. */
 export interface WatchOptions {
@@ -17,7 +19,7 @@ export interface WatchOptions {
  * Watch for an accessor's value to change, and call the callback.
  */
 export function watch<T>(
-  value: Accessor<T>,
+  value: Accessor<T> | Ref<T>,
   cb: (newValue: T, oldValue: T) => void,
   options?: WatchOptions,
 ): void;
@@ -25,19 +27,19 @@ export function watch<T>(
  * Watch for an accessor's value to change, and call the callback. Old value is `undefined` the first time the callback is executed.
  */
 export function watch<T>(
-  value: Accessor<T>,
+  value: Accessor<T> | Ref<T>,
   cb: (newValue: T, oldValue: T | undefined) => void,
   options: { immediate: true },
 ): void;
 export function watch<T>(
-  value: Accessor<T>,
+  value: Accessor<T> | Ref<T>,
   cb: (newValue: T, oldValue: T | undefined) => void,
   options?: WatchOptions,
 ) {
   const [prev, setPrev] = createSignal<T>();
   const effect = () => {
     const oldValue = prev();
-    const newValue = value();
+    const newValue = toValue(value);
     if (options?.deep ? !dequal(oldValue, newValue) : oldValue !== newValue) {
       cb(newValue, oldValue);
     }
