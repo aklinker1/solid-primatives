@@ -13,6 +13,7 @@
     "./shallowRef": "./src/shallowRef.ts",
     "./toValue": "./src/toValue.ts",
     "./useDebounce": "./src/useDebounce.ts",
+    "./useRequiredContext": "./src/useRequiredContext.ts",
     "./useThrottle": "./src/useThrottle.ts",
     "./useWindowEventListener": "./src/useWindowEventListener.ts",
     "./watch": "./src/watch.ts",
