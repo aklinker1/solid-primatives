@@ -2,10 +2,7 @@
  * Slow down calls to a function.
  * @module
  */
-import {
-  type MaybeRefOrAccessor,
-  toValue,
-} from "@aklinker1/solid-primatives/toValue";
+import { type MaybeRefOrAccessor, toValue } from "./toValue.ts";
 
 /**
  * `useDebounce` prevents a function from being called multiple times in a row.
