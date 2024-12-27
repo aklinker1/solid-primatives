@@ -1,11 +1,20 @@
 {
   "$schema": "https://deno.land/x/deno/cli/schemas/config-file.v1.json",
   "name": "@aklinker1/solid-primatives",
+<<<<<<< Updated upstream
   "version": "0.3.11",
+=======
+  "version": "0.3.12",
+>>>>>>> Stashed changes
   "license": "MIT",
   "exports": {
+    "./computed": "./src/computed.ts",
     "./defineComponent": "./src/defineComponent.ts",
     "./query": "./src/query.ts",
+    "./readonly": "./src/readonly.ts",
+    "./ref": "./src/ref.ts",
+    "./setter": "./src/setter.ts",
+    "./shallowRef": "./src/shallowRef.ts",
     "./toValue": "./src/toValue.ts",
     "./watch": "./src/watch.ts",
     "./whenever": "./src/whenever.ts"
