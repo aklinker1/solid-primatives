@@ -2,7 +2,7 @@
  * Manage global state.
  * @module
  */
-import { createRoot, getOwner, type Owner } from "solid-js";
+import { createRoot } from "solid-js";
 
 /**
  * Keep states in the global scope to be reusable across Solid apps/components.
