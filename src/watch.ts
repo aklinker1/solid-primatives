@@ -38,11 +38,11 @@ export function watch<T>(
 ) {
   const [prev, setPrev] = createSignal<T>();
 
-  let ranOnce = false;
+  const [ranOnce, setRanOnce] = createSignal(false);
 
   const effect = () => {
-    if (!options?.immediate && !ranOnce) {
-      ranOnce = true;
+    if (!options?.immediate && !ranOnce()) {
+      setRanOnce(true);
       return;
     }
 
@@ -54,7 +54,4 @@ export function watch<T>(
     setPrev(prev);
   };
   createEffect(effect);
-  if (options?.immediate) {
-    effect();
-  }
 }
