@@ -37,7 +37,15 @@ export function watch<T>(
   options?: WatchOptions,
 ) {
   const [prev, setPrev] = createSignal<T>();
+
+  let ranOnce = false;
+
   const effect = () => {
+    if (!options?.immediate && !ranOnce) {
+      ranOnce = true;
+      return;
+    }
+
     const oldValue = prev();
     const newValue = toValue(value);
     if (options?.deep ? !dequal(oldValue, newValue) : oldValue !== newValue) {
