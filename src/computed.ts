@@ -53,6 +53,11 @@ export function computed<T>(
   return Object.defineProperty(
     { __ref: true } as unknown,
     "value",
-    { get: get, writable: false },
+    {
+      get,
+      set: () => {
+        throw Error("Cannot set value of computed ref");
+      },
+    },
   ) as Ref<T>;
 }
